@@ -41,7 +41,7 @@ function AddFundSource() {
         if (userDoc.exists()) {
           console.log('User data:', userDoc.data()); // Log the entire user document
           const userData = userDoc.data();
-          setCustomerId(userData.stripeCustomerId); // Ensure this is set
+          setCustomerId(userData.stripeCustomerId); 
           if (userData.bankAccounts) {
             console.log('Bank accounts:', userData.bankAccounts); // Log bank accounts
             setBankAccounts(userData.bankAccounts);

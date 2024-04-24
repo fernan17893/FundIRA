@@ -60,7 +60,7 @@ exports.addBankAccount = functions.https.onCall(async (data, context) => {
     }
 });
 
-exports.createUser = functions.auth.user().onCreate(async (user) => {
+/**exports.createUser = functions.auth.user().onCreate(async (user) => {
     const userRef = admin.firestore().collection('users').doc(user.uid);
     const doc = await userRef.get();
     if (doc.exists && doc.data().stripeCustomerId) {
@@ -110,7 +110,7 @@ exports.verifyMicrodeposits = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError('internal', 'Unable to verify microdeposits', error);
     }
 });
-
+**/
 
 exports.processPayment = functions.https.onCall(async (data, context) => {
     // Check for authentication

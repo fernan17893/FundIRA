@@ -10,13 +10,5 @@ export default defineConfig({
      "@": path.resolve(__dirname, "./src"),
    },
  },
- proxy: {
-  // proxy all webpack dev-server requests starting with /api to our backend (Node.js) server on port 3000
-  '/add-bank': {
-    target: 'http://localhost:3000', // can be [protocol][hostname][port][base_path]
-    changeOrigin: true,
-    secure: false,
-    rewrite: (path) => path.replace(/^\/add-bank/, '')
-  },
-},
+ base: '/FundIRA/'
 })
