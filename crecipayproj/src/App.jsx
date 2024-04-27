@@ -7,7 +7,7 @@ import './App.css';
 
 const App = () => {
   return (
-    <Router>
+    <Router basename='/FundIRA'>
       <AuthProvider>
         <Routes>
           <Route path="/" element={<LoginPage />} />

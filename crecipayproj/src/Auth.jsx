@@ -1,5 +1,5 @@
 // Auth.js
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { app } from './firebase.config.js';  // Import the Firebase app
 
 const auth = getAuth(app);
@@ -12,4 +12,9 @@ export function signUp(email, password) {
 // SignIn function
 export function signIn(email, password) {
   return signInWithEmailAndPassword(auth, email, password)
+}
+
+
+export function logout() {
+  return signOut(auth);
 }

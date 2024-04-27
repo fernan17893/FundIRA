@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://fernan17893.github.io/FundIRA/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -20,6 +21,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cors": "^2.8.5",
+    "embla-carousel-react": "^8.0.2",
     "express": "^4.19.2",
     "firebase": "^10.11.0",
     "lucide-react": "^0.372.0",

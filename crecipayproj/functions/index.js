@@ -1,7 +1,6 @@
-const {onRequest} = require("firebase-functions/v2/https");
-const logger = require("firebase-functions/logger");
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const { billing } = require('firebase-functions/v2/alerts');
 const stripe = require('stripe')('sk_test_51P7zmMRqlaXFAeEOswB4OCwnhio25wQFstoDcHnagT7sHfwaZwyvWLRND3F9wFPAiLZJSMwWAivVhV1ooaPr6BIl00tbX16P1m');
 
 admin.initializeApp();
@@ -26,9 +25,18 @@ exports.addBankAccount = functions.https.onCall(async (data, context) => {
             });
             customerId = customer.id;
             await userRef.set({ stripeCustomerId: customerId }, { merge: true });
+
+            // Set custom claim for the user
+            await admin.auth().setCustomUserClaims(uid, { stripeCustomerId: customerId });
         }
 
         const { account_number, routing_number, account_holder_name, account_holder_type } = data;
+
+        // Ensure that routing_number is provided
+        if (!routing_number) {
+            throw new functions.https.HttpsError('invalid-argument', 'Routing number is required.');
+        }
+
         const token = await stripe.tokens.create({
             bank_account: {
                 country: 'US',
@@ -47,11 +55,24 @@ exports.addBankAccount = functions.https.onCall(async (data, context) => {
         bankAccounts.push({
             id: token.id,
             name: account_holder_name,
+            account_number: account_number,
             last4: account_number.slice(-4), // Last 4 digits of 
-            type: account_holder_type
+            type: account_holder_type,
+            routing_number: routing_number // Include routing number in bank account details
         });
 
         await userRef.set({ bankAccounts: bankAccounts }, { merge: true });
+
+        // Update bankAccountId in Firestore to match the correct value from Stripe
+        const updatedBankAccounts = bankAccounts.map(account => {
+            if (account.id === token.id) {
+                // Update the bankAccountId to the correct value from Stripe
+                return { ...account, id: token.bank_account };
+            }
+            return account;
+        });
+
+        await userRef.set({ bankAccounts: updatedBankAccounts }, { merge: true });
 
         return { message: "Bank account added successfully to Stripe customer!", bankAccountId: token.id };
     } catch (error) {
@@ -59,6 +80,48 @@ exports.addBankAccount = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError('internal', `Failed to add bank account: ${error.message}`, { error: error });
     }
 });
+
+
+
+exports.processPayment = functions.https.onCall(async (data, context) => {
+    // Auth check
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'Authentication is required.');
+    }
+
+    const { amount, bankAccountToken, customerId } = data;
+
+    if (!amount || !bankAccountToken || !customerId) {
+        console.error('Missing payment fields', { amount, bankAccountToken, customerId });
+        throw new functions.https.HttpsError('invalid-argument', 'Missing required payment fields.');
+    }
+
+    console.log("Recieved data:", { amount, bankAccountToken, customerId })
+
+    try {
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: Math.round(amount * 100), 
+            currency: 'usd',
+            customer: customerId,
+            payment_method: bankAccountToken.id,
+            payment_method_types: ['ach_debit'],
+
+
+        });
+
+        console.log(`Payment processed successfully: ${paymentIntent.id}`);
+        return { success: true, paymentIntentId: paymentIntent.id };
+    } catch (error) {
+        console.error("Error processing payment:", error);
+        console.log("Error processing payment:", error.details);
+        throw new functions.https.HttpsError('internal', 'Failed to process payment', {
+            error: error.toString(),
+            stack: error.stack,
+        });
+    }
+});
+
+
 
 /**exports.createUser = functions.auth.user().onCreate(async (user) => {
     const userRef = admin.firestore().collection('users').doc(user.uid);
@@ -111,63 +174,6 @@ exports.verifyMicrodeposits = functions.https.onCall(async (data, context) => {
     }
 });
 **/
-
-exports.processPayment = functions.https.onCall(async (data, context) => {
-    // Check for authentication
-    if (!context.auth) {
-      throw new functions.https.HttpsError('unauthenticated', 'Authentication is required.');
-    }
-
-    const { amount, bankAccountId, customerId } = data;
-    if (!amount || !bankAccountId || !customerId) {
-        console.error('Missing payment fields', { amount, bankAccountId, customerId });
-        throw new functions.https.HttpsError('invalid-argument', 'Missing required payment fields.');
-    }
-
-    try {
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(amount * 100), 
-            currency: 'usd',
-            customer: customerId,
-            payment_method: bankAccountId, // Bank account ID  for hardcode option = ba_1P8zAFRqlaXFAeEOLywP2cDO
-            confirmation_method: 'manual',
-            confirm: true,
-            payment_method_options: {
-                us_bank_account: {
-                    verification_method: 'instant'  
-                }
-            },
-            mandate_data: {
-                customer_acceptance: {
-                    type: 'online',
-                    online: {
-                        ip_address: '192.0.2.1', // Example IP, use for testing
-                        user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36', // Example User Agent
-                        date: Math.floor(Date.now() / 1000),  // Current timestamp
-                        accepted: true,
-                    }
-                }
-            }
-        });
-
-        console.log(`Payment processed successfully: ${paymentIntent.id}`);
-        return { success: true, paymentIntentId: paymentIntent.id };
-    } catch (error) {
-        console.error("Error processing payment Backend:", error);
-        if (error.stripeResponse) {
-            console.error("Stripe error:", error.stripeResponse);
-            console.log("Stripe error code:", error.stripeResponse.statusCode);
-        }
-        throw new functions.https.HttpsError('internal', 'Failed to process payment', {
-            error: error.toString(),
-            stack: error.stack,
-        });
-    }
-});
-
-
-
-
   
 
 
