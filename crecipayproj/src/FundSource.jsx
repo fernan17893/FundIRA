@@ -134,20 +134,18 @@ function AddFundSource() {
           </DialogContent>
         </Dialog>
         <Carousel className="carousel-container">
-          <CarouselPrevious className="carousel-previous">&lt;</CarouselPrevious>
           <CarouselContent className="carousel-content">
             {bankAccounts.map((account, index) => (
-              <CarouselItem className='carousel-item' key={index}>
+              <CarouselItem className='carousel-item pl-4' key={index}>
                 <div className='account-details' >
                   <p className='item'><strong>Fund Name:</strong> {account.name}</p>
                   <p className='item'><strong>Type:</strong> {account.type}</p>
                   <p className='item'><strong>Account:</strong> ****{account.last4}</p>
-                  <p className='balance-amount'><strong>Available Balance:</strong> ${parseFloat(Math.random() * 5000).toFixed(2)}</p>
+                  <p className='balance-amount'><strong>Balance:</strong> ${parseFloat(Math.random() * 5000).toFixed(2)}</p>
                 </div>
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselNext className="carousel-next">&gt;</CarouselNext>
         </Carousel>
       </div>
     );

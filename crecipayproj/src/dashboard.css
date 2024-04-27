@@ -299,26 +299,29 @@
   position: relative;
   overflow: hidden;
   margin: 10px auto;
-  width: 50%; /* Adjust width as needed */
+  width: 100%; /* Adjust width as needed */
   height: 450px; /* Adjust height as needed */
 }
 
 /* Carousel Content Wrapper */
 .carousel-content {
   display: flex;
-  transition: transform 0.5s ease-in-out;
-  flex-direction: row;
+  width: 100%;
+  flex-wrap: nowrap;
+  justify-content: center;
 }
 
 /* Carousel Item */
 .carousel-item {
-  min-width: 100%; /* Each item takes the full width of the carousel */
+  min-width: 25%; /* Each item takes the full width of the carousel */
   transition: opacity 0.5s ease-in-out;
   position: relative;
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
   flex-direction: column;
+  flex: 0 0 25%;
+  margin-right: 10px;
 }
 
 /* Previous and Next Buttons */
@@ -364,22 +367,28 @@
   background-color: #fff;
   box-shadow: 5px 5px 5px 5px rgba(0,0,0,0.2);
   border-radius: 10px;
-  max-width: 50%;
+  max-width: 100%;
   margin-bottom: 10px;
   max-height: 90%;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .account-details{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+ 
   margin-top: 10px;
   font-size: 20px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: center;
+
 
 }
 .item {
-  margin: 5px 0;
   font-size: 18px; /* Increased font size */
   color: #333;
 
@@ -389,7 +398,9 @@
 .balance-amount {
   color: #1DB954; /* Green color for the amount */
   font-weight: bold;
-  font-size: 30px; /* Increased font size */
+/* Increased font size */
+  margin-top: 10px;
+  
   
 }
 
@@ -398,5 +409,6 @@
   font-weight: bold;
   color: #555;
   font-size: 20px; /* Increased font size */
+ 
   
 }
