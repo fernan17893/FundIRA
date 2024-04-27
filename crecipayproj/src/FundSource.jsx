@@ -9,6 +9,7 @@ import {  useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import './index.css';
 
 const functions = getFunctions();
 const addBankAccount = httpsCallable(functions, 'addBankAccount');

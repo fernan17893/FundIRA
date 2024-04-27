@@ -15,6 +15,7 @@ import { DialogDescription, DialogTrigger, DialogTitle } from 'radix-ui';
 import { useNavigate } from 'react-router-dom';
 import './index.css';
 import { RiFundsBoxFill } from "react-icons/ri";
+import './index.css';
 
 function Dashboard() {
     
